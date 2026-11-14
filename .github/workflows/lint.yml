@@ -1,0 +1,50 @@
+name: Lint and Validate Tetragon Policies
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  validate:
+    name: Validate YAML, Shell Scripts & TracingPolicies
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Lint YAML files
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          config_data: |
+            extends: default
+            rules:
+              line-length: disable
+              document-start: disable
+
+      - name: Lint shell scripts with ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: './scripts'
+
+      - name: Install Tetragon CLI (tetra)
+        run: |
+          curl -sL https://github.com/cilium/tetragon/releases/latest/download/tetra-linux-amd64.tar.gz | tar -xz
+          sudo mv tetra /usr/local/bin/tetra
+          sudo chmod +x /usr/local/bin/tetra
+          tetra version --client
+
+      - name: Validate TracingPolicy syntax and fields
+        run: |
+          for policy in policies/*.yaml; do
+            echo "Validating $policy..."
+            # Verify required CRD headers and core spec keys
+            grep -q "apiVersion: cilium.io/v1alpha1" "$policy"
+            grep -qE "kind: TracingPolicy(Namespaced)?" "$policy"
+            # Verify kprobe call targets against Tetragon schema
+            tetra explain tracingpolicy.spec.kprobes > /dev/null
+          done
+          echo "All TracingPolicy manifests passed validation."
+

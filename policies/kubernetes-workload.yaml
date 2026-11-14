@@ -1,0 +1,25 @@
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicyNamespaced
+metadata:
+  name: "web-frontend-strict-binary-allowlist"
+  namespace: production
+spec:
+  # Scope this policy strictly to Pods matching these labels
+  podSelector:
+    matchLabels:
+      app: web-frontend
+  kprobes:
+    - call: "security_bprm_check"
+      syscall: false
+      args:
+        - index: 0
+          type: "linux_binprm"
+      selectors:
+        - matchBinaries:
+            - operator: NotIn
+              values:
+                - "/sbin/tini"
+                - "/usr/sbin/nginx"
+          matchActions:
+            - action: Sigkill
+

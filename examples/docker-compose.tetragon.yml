@@ -1,0 +1,26 @@
+services:
+  tetragon:
+    image: quay.io/cilium/tetragon:latest
+    container_name: tetragon
+    privileged: true
+    pid: "host"
+    network_mode: "host"
+    cgroupns: "host"
+    restart: unless-stopped
+    deploy:
+      mode: global
+    command:
+      - "--tracing-policy-dir=/etc/tetragon/tetragon.tp.d"
+      - "--export-filename=/var/log/tetragon/tetragon.log"
+    volumes:
+      # Kernel BTF and BPF filesystem mounts required for eBPF programs
+      - /sys/kernel/btf/vmlinux:/var/sys/kernel/btf/vmlinux:ro
+      - /sys/fs/bpf:/sys/fs/bpf
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      # Docker socket for container metadata enrichment
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Mount your custom TracingPolicy directory
+      - ../policies:/etc/tetragon/tetragon.tp.d:ro
+      # Persist JSON security event logs on the host
+      - /var/log/tetragon:/var/log/tetragon
+

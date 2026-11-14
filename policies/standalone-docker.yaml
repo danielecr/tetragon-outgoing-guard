@@ -1,0 +1,65 @@
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: "outgoing-guard-container-allowlist-and-host-egress"
+spec:
+  kprobes:
+    # ==========================================================================
+    # RULE 1: Container Binary Allowlist
+    # Blocks unauthorized binaries, reverse shells (/bin/sh), and /dev/shm implants
+    # inside any non-host PID namespace.
+    # ==========================================================================
+    - call: "security_bprm_check"
+      syscall: false
+      args:
+        - index: 0
+          type: "linux_binprm"
+      selectors:
+        # Target ONLY processes running inside containers (exclude root host_ns)
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - "host_ns"
+          # Replace these paths with the output of scripts/discover-binaries.sh
+          matchBinaries:
+            - operator: NotIn
+              values:
+                - "/sbin/tini"
+                - "/usr/bin/tini"
+                - "/usr/sbin/nginx"
+                - "/usr/local/bin/python3.12"
+                - "/usr/bin/certbot"
+          # Comment out matchActions during initial audit testing
+          matchActions:
+            - action: Sigkill
+
+    # ==========================================================================
+    # RULE 2: Host Outbound TCP Zero-Trust
+    # Blocks any process on the root host from opening public TCP connections.
+    # Return traffic for listening services (e.g., SSH) is unaffected.
+    # ==========================================================================
+    - call: "tcp_connect"
+      syscall: false
+      args:
+        - index: 0
+          type: "sock"
+      selectors:
+        # Target ONLY processes running directly on the host
+        - matchNamespaces:
+            - namespace: Pid
+              operator: In
+              values:
+                - "host_ns"
+          # Allow loopback and private RFC1918 networks (Docker bridge / internal LAN)
+          matchArgs:
+            - index: 0
+              operator: NotDAddr
+              values:
+                - "127.0.0.0/8"
+                - "10.0.0.0/8"
+                - "172.16.0.0/12"
+                - "192.168.0.0/16"
+          matchActions:
+            - action: Sigkill
+
