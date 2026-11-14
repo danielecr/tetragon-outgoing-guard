@@ -1,10 +1,10 @@
 name: Lint and Validate Tetragon Policies
 
-on:
+"on":
   push:
-    branches: [ main, master ]
+    branches: [main, master]
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
 
 jobs:
   validate:
@@ -40,10 +40,8 @@ jobs:
         run: |
           for policy in policies/*.yaml; do
             echo "Validating $policy..."
-            # Verify required CRD headers and core spec keys
             grep -q "apiVersion: cilium.io/v1alpha1" "$policy"
             grep -qE "kind: TracingPolicy(Namespaced)?" "$policy"
-            # Verify kprobe call targets against Tetragon schema
             tetra explain tracingpolicy.spec.kprobes > /dev/null
           done
           echo "All TracingPolicy manifests passed validation."
