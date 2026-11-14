@@ -45,4 +45,3 @@ jobs:
             tetra explain tracingpolicy.spec.kprobes > /dev/null
           done
           echo "All TracingPolicy manifests passed validation."
-

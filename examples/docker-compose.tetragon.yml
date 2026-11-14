@@ -27,4 +27,3 @@ services:
       - ../policies:/etc/tetragon/tetragon.tp.d:ro
       # Persist JSON security event logs on the host
       - /var/log/tetragon:/var/log/tetragon
-

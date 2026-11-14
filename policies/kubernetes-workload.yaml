@@ -26,4 +26,3 @@ spec:
                 - "/usr/sbin/nginx"
           matchActions:
             - action: Sigkill
-
