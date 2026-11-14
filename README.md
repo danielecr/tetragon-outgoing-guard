@@ -106,3 +106,6 @@ alias sysupgrade='docker compose -f /path/to/examples/docker-compose.tetragon.ym
 - **Interpreted languages (Python, Node.js, PHP):** `security_bprm_check` evaluates the binary executable passed to `execve` (e.g., `/usr/local/bin/python3.12`), not the `.py` script argument. Allowlisting the interpreter allows any script executed by that interpreter, while still blocking sub-shells (`os.system()`, `subprocess` calling `/bin/sh`).
 - **Healthchecks:** If your `Dockerfile` or `docker-compose.yml` defines a `HEALTHCHECK` using `curl` or `wget`, those binaries will be killed unless added to the allowlist. Prefer native TCP/HTTP probes or distroless/Go healthcheck binaries.
 
+## Author & License
+Created by **Daniele Cruciani** ([@danielecr](https://github.com)).  
+Licensed under the [Apache License 2.0](LICENSE).
