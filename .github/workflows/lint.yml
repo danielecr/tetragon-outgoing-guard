@@ -34,7 +34,7 @@ jobs:
           curl -sL https://github.com/cilium/tetragon/releases/latest/download/tetra-linux-amd64.tar.gz | tar -xz
           sudo mv tetra /usr/local/bin/tetra
           sudo chmod +x /usr/local/bin/tetra
-          tetra version --client
+          tetra version
 
       - name: Validate TracingPolicy syntax and fields
         run: |
