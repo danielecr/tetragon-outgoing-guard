@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Daniele Cruciani (@danielecr)
+# Source: https://github.com/danielecr/tetragon-outgoing-guard
+
 services:
   tetragon:
     image: quay.io/cilium/tetragon:latest

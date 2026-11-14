@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Daniele Cruciani (@danielecr)
+# Source: https://github.com/danielecr/tetragon-outgoing-guard
+
 set -euo pipefail
 
 if [[ $EUID -ne 0 ]]; then
